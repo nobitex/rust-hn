@@ -1,0 +1,93 @@
+body {
+    background-color: white;
+}
+
+header {
+    box-sizing: border-box;
+    width: 100%;
+    font-size: 0.85em;
+    line-height: 2em;
+    height: 2em;
+    padding: 0 0.5em;
+    background-color: #f60;
+}
+
+#main {
+    width: 1400px;
+    margin: 0.5em auto;
+    background-color: #f6f6ef;
+    min-height: 100vh;
+}
+
+.url {
+    font-size: 0.7em;
+    color: #828282;
+    margin: 0 0.5em;
+}
+
+#content {
+    font-size: 0.9em;
+}
+
+.desc {
+    margin: 0.5em 0;
+    font-size: 0.7em;
+    color: #828282;
+}
+
+#content li {
+    margin: 0.5em 0.5em;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+ol {
+    counter-reset: item;
+}
+
+ol li {
+    display: block;
+}
+
+ol li:before {
+    content: counter(item) ". ";
+    counter-increment: item;
+    color: #828282;
+    vertical-align: top;
+}
+
+#form {
+    margin: 1em;
+}
+
+#form td {
+    vertical-align: middle;
+}
+
+#form td {
+    padding: 0.2em;
+}
+
+#form label {
+    color: #828282;
+}
+
+#form input[type=text],
+#form input[type=password],
+#form textarea {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+#form textarea {
+    height: 150px;
+}
+
+h2 {
+    margin-top: 1.5em;
+    margin-left: 1em;
+    font-size: 1.1em;
+}
