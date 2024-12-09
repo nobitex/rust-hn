@@ -1,0 +1,92 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                posts.*,\n                users.username                                                  as username, \n                COUNT(upvotes.post_id)                                          as total_upvotes, \n                (SELECT true FROM upvotes \n                    WHERE upvotes.post_id = posts.id AND upvotes.user_id = $1)  as upvoted,\n                (SELECT COUNT(*) FROM posts as pst\n                    WHERE pst.root_id = posts.id)                               as comments_count\n                FROM posts \n                LEFT JOIN upvotes ON upvotes.post_id = posts.id \n                LEFT JOIN users ON users.id = posts.user_id\n                WHERE ($2 = -1 OR posts.id = $2) AND\n                    (($4 = -1 AND posts.root_id is null) OR ($4 <> -1 AND posts.root_id = $4)) AND\n                    (posts.title is null OR starts_with(posts.title, $5))\n                GROUP BY (users.username, posts.id)\n                ORDER BY posts.created_at DESC\n                OFFSET $3\n                LIMIT 20",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "root_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "parent_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "link",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "content",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 8,
+        "name": "username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "total_upvotes",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 10,
+        "name": "upvoted",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 11,
+        "name": "comments_count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int8",
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "0c8ed530fd47fa5f65356739f7108ebe1e7129595fc03bc9fbd31fabf928bf96"
+}

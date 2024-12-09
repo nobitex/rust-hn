@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Collaborative cryptocurrency, blockchain and cryptography news platform!">
+    <meta name=”robots” content="index, follow">
+    <link rel="stylesheet" href="assets/style.css">
+    <title>{% block title %}Satoshi Family{% endblock %}</title>
+    <script src="assets/script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        async function upvote(post_id) {
+            {% if user %}
+            (async () => {
+                const rawResponse = await fetch('/upvote', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ post_id: post_id })
+                });
+                const content = await rawResponse.json();
+                if (content["ok"]) {
+                    $("#post-" + post_id).css('visibility', 'hidden');
+                    let inc = parseInt($("#upvotes-cnt-" + post_id).text()) + 1;
+                    $("#upvotes-cnt-" + post_id).text(inc.toString());
+                }
+            })();
+            {% else %}
+            window.location.href = '/login';
+            {% endif %}
+        }
+
+        let update_btc_price = () => {
+            $.getJSON('https://api.coindesk.com/v1/bpi/currentprice.json', function (res) {
+                let price = Math.floor(parseFloat(res["bpi"]["USD"]["rate_float"]));
+                $('#btc-price').html(" | BTC $" + price);
+            });
+        }
+        update_btc_price();
+        setInterval(() => {
+            update_btc_price();
+        }, 30000);
+    </script>
+</head>
+
+{% macro post_block(post, is_comment, can_comment) %}
+{% if is_comment or can_comment %}
+<div style="margin: 1em {{post.depth+1}}em;">
+    {% endif %}
+    {% if post.is_me %}
+    <span style="color: red; font-size: 1.1em; vertical-align: top;">*</span>
+    {% else %}
+    <a id="post-{{post.post.id}}" href="javascript:upvote({{post.post.id}})"
+        style="vertical-align: top; {% if post.post.upvoted %}visibility: hidden; {% endif %}"><img
+            src="assets/triangle.svg" style="height: 0.7em;"></a>
+    {% endif %}
+    <div style="display: inline-block; text-wrap: wrap; white-space: normal !important; width: calc(100% - 1.5em);">
+        {% if post.post.title %}
+        <a style="color: black; text-decoration: none;"
+            href="{% if post.post.link %} {{post.post.link}} {% else %} /item?id={{ post.post.id }} {% endif %}">
+            {{ post.post.title }}
+        </a>
+        {% if post.post.link %}
+        <span class="url">({{post.readable_link}})</span>
+        {% endif %}
+        {% endif %}
+        <div class="desc"><span id="upvotes-cnt-{{post.post.id}}">{{ 1 + post.post.total_upvotes }}</span> points by {{
+            post.post.username }} {{ post.elapsed }} ago {% if not is_comment %}| <a
+                href="/item?id={{ post.post.id }}">{{
+                post.post.comments_count }}
+                comments</a>{% endif %}
+            {% if user and user.is_admin %}
+            | <form class="remove" action="/remove" method="post">
+                <button type="submit">remove</button>
+                <input type="hidden" name="id" value="{{post.post.id}}">
+            </form>
+            {% endif %}
+        </div>
+        {% if is_comment or can_comment %}
+        {% if post.post.content %}
+        <p class="comment" style="max-width: 800px;">{{ post.post.content }}</p>
+        {% endif %}
+        {% if can_comment %}
+        <form action="comment" method="POST" style="display: inline-block; width: 100%;">
+            <textarea style="max-width: 500px; width: 100%; height: 150px; margin: 1em 0; display: block;"
+                name="text">{% if form and form.text %}{{ form.text }}{% endif %}</textarea>
+            {% if error %}
+            <div style="margin-bottom: 1em; color: red;">
+                {{ error }}
+            </div>
+            {% endif %}
+            <div>
+                <input type="submit" {% if user %}{% if user.is_verified %}value="comment" {% else
+                    %}value="account not verified" disabled{% endif %}{% else %}value="login to comment" disabled{%
+                    endif %}>
+            </div>
+            {% if post.post.root_id %}
+            <input type="hidden" name="post_id" value="{{ post.post.root_id }}">
+            <input type="hidden" name="parent_id" value="{{ post.post.id }}">
+            {% else %}
+            <input type="hidden" name="post_id" value="{{ post.post.id }}">
+            {% endif %}
+        </form>
+        {% else %}
+        <div><a class="reply" href="/comment?id={{post.post.id}}&root={{post.post.root_id}}">reply</a></div>
+        {% endif %}
+        {% endif %}
+    </div>
+    {% if is_comment or can_comment %}
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro chat() %}
+<div id="chat">
+    <header>
+        <div style="text-align: left; width: 50%; float: left;">
+            <a style="font-weight: bold;" href="#">Satoshi Chat</a>
+        </div>
+        <div style="text-align: right; width: 50%; float: left;">
+            <span>
+                <a id="start-new-chat-btn" href="#">new chat</a> | <span id="toggle-chat-btn" data-state="closed">open
+                    chat</span>
+                <div id="chat-create" style="display: none;">
+                    <input id="chat-create-address" type="text" placeholder="address...">
+                    <input id="chat-create-btn" type="submit" value="start chat" style="margin: 0.1em;">
+                    <div id="chat-create-error" style="display: none; color: red;">
+                        error
+                    </div>
+                </div>
+            </span>
+        </div>
+    </header>
+    <div id="chat-holder" class="closed-chat" style="display: none;">
+        <div id="chat-items">
+            <!-- <div class="chat-item">
+                <p>
+                    0xl1jk23l1098098098123
+                    &nbsp;🟢
+                </p>
+            </div> -->
+        </div>
+        <div id="chat-detail">
+            <header>
+                <span id="chat-back" style="border: 1px solid #000; cursor: pointer; font-weight: bold;"> back
+                </span>&nbsp;
+                <span id="chat-partner-username" style="font-weight: bold;">Address: 0xl1jk23l1098098098123</span>
+            </header>
+            <div id="chats-content">
+                <div class="self-chat-item">
+                    <p class="chat-content">adsadas</p>
+                    <small>time </small>
+                </div>
+                <div class="user-chat-item">
+                    <p class="chat-content">
+                        asdlkjaldskajdslkjaslkdjasdlkjaldskjaslkdjaslkdjaslkdjaslkdjaslkdjsalkdjsadlkajdalkdjalksjdalksdjaslkdjaslkdjalkdjaslkdajslkajsdlkajsdasadsadas
+                    </p>
+                    <small>time </small>
+                </div>
+                <div class="self-chat-item">
+                    <p class="chat-content">adsadas</p>
+                    <small>time </small>
+                </div>
+                <div class="self-chat-item">
+                    <p class="chat-content">adsadas</p>
+                    <small>time </small>
+                </div>
+                <div class="self-chat-item">
+                    <p class="chat-content">adsadas</p>
+                    <small>time </small>
+                </div>
+                <div class="self-chat-item">
+                    <p class="chat-content">adsadas</p>
+                    <small>time </small>
+                </div>
+                <div class="user-chat-item">
+                    <p class="chat-content">
+                        asdlkjaldskajdslkjaslkdjasdlkjaldskjaslkdjaslkdjaslkdjaslkdjaslkdjsalkdjsadlkajdalkdjalksjdalksdjaslkdjaslkdjalkdjaslkdajslkajsdlkajsdasadsadas
+                    </p>
+                    <small>time </small>
+                </div>
+                <div class="user-chat-item">
+                    <p class="chat-content">
+                        asdlkjaldskajdslkjaslkdjasdlkjaldskjaslkdjaslkdjaslkdjaslkdjaslkdjsalkdjsadlkajdalkdjalksjdalksdjaslkdjaslkdjalkdjaslkdajslkajsdlkajsdasadsadas
+                    </p>
+                    <small>time </small>
+                </div>
+                <div class="user-chat-item">
+                    <p class="chat-content">
+                        asdlkjaldskajdslkjaslkdjasdlkjaldskjaslkdjaslkdjaslkdjaslkdjaslkdjsalkdjsadlkajdalkdjalksjdalksdjaslkdjaslkdjalkdjaslkdajslkajsdlkajsdasadsadas
+                    </p>
+                    <small>time </small>
+                </div>
+                <div class="user-chat-item">
+                    <p class="chat-content">
+                        asdlkjaldskajdslkjaslkdjasdlkjaldskjaslkdjaslkdjaslkdjaslkdjaslkdjsalkdjsadlkajdalkdjalksjdalksdjaslkdjaslkdjalkdjaslkdajslkajsdlkajsdasadsadas
+                    </p>
+                    <small>time </small>
+                </div>
+                <div class="user-chat-item">
+                    <p class="chat-content">
+                        asdlkjaldskajdslkjaslkdjasdlkjaldskjaslkdjaslkdjaslkdjaslkdjaslkdjsalkdjsadlkajdalkdjalksjdalksdjaslkdjaslkdjalkdjaslkdajslkajsdlkajsdasadsadas
+                    </p>
+                    <small>time </small>
+                </div>
+            </div>
+            <div id="chat-input">
+                <input id="chat-input-text" type="text" placeholder="type here...">
+                <input id="chat-input-send-btn" type="submit" value="send">
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+<body>
+    <div id="main">
+        <header style="color:black;">
+            <div style="text-align: left; width: 70%; float: left;">
+                <img src="assets/logo.svg" style="height: 1.3em; vertical-align: middle;padding-bottom: 0.3em;">
+                <a style="font-weight: bold;" href="/">Satoshi Family</a>
+                <div style="display: inline-block;"><a href="/">new</a> |
+                    <a href="/ask">ask</a> | <a href="/show">show</a> | <a href="/hire">hire</a> | <a
+                        href="submit">submit</a><span id="btc-price"></span>
+                </div>
+            </div>
+            <div style="text-align: right; width: 30%; float: left;">
+                <span>
+                    {% if user %}
+                    <span id="loggedinSpan">
+                        <a href="/profile" id="header_username">{{ user.username }} ({{ user.karma }})</a> |
+                        <a href="/logout" id="logout">logout</a>
+                    </span>
+                    {% else %}
+                    <span id="loginSpan">
+                        <a href="/login">login</a>
+                    </span>
+                    {% endif %}
+                </span>
+            </div>
+            <div style="clear: both;"></div>
+        </header>
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+
+</html>

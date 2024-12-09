@@ -1,0 +1,11 @@
+{% extends 'template.html' %}
+
+{% block title %}{{ post.post.title }} | {{ super() }}{% endblock %}
+
+{% block content %}
+{{ post_block(post, false, true) }}
+
+{% for comment in comments %}
+{{ post_block(comment, true, false) }}
+{% endfor %}
+{% endblock %}

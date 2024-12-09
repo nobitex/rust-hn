@@ -1,0 +1,99 @@
+{% extends 'template.html' %}
+
+{% block content %}
+<h2>login</h2>
+<form method="post" action="/login">
+    <table id="form">
+        <tbody>
+            <tr>
+                <td><label for="username">username:</label></td>
+                <td>
+                    <input type="text" name="username" minlength="4" maxlength="64" required>
+                </td>
+            </tr>
+            <tr>
+                <td><label for="password">password:</label></td>
+                <td><input type="password" name="password" minlength="6" maxlength="64" required></td>
+            </tr>
+            {% if login_error %}
+            <tr>
+                <td colspan="2" style="color: red;">
+                    {{ login_error }}
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td></td>
+                <td>
+                    <input type="submit" value="submit">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+<h2>create account</h2>
+<form method="post" action="/signup">
+    <table id="form">
+        <tbody>
+            <tr>
+                <td><label for="username">username:</label></td>
+                <td>
+                    <input type="text" name="username" minlength="4" maxlength="64" required>
+                </td>
+            </tr>
+            <tr>
+                <td><label for="password">password:</label></td>
+                <td><input type="password" name="password" minlength="6" maxlength="64" required></td>
+            </tr>
+            {% if signup_error %}
+            <tr>
+                <td colspan="2" style="color: red;">
+                    {{ signup_error }}
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td></td>
+                <td>
+                    <input type="submit" value="create account">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+{% if access_token %}
+<script>
+    localStorage.setItem('access_token', '{{ access_token }}');
+    localStorage.setItem('username', '{{ username }}');
+    localStorage.setItem('user_id', '{{ user_id }}');
+
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
+    setCookie('access_token', '{{ access_token }}', 90);
+
+    window.location.href = '/';
+</script>
+{% endif %}
+
+{% if logout %}
+<script>
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('username');
+
+    function eraseCookie(name) {
+        document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
+    eraseCookie('access_token');
+
+    window.location.href = '/';
+</script>
+{% endif %}
+
+{% endblock %}

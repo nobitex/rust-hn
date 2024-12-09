@@ -1,0 +1,40 @@
+{% extends 'template.html' %}
+
+{% block content %}
+{% if user.is_verified %}
+<form method="post" style="width: 100%;">
+    <table id="form" style="width: 400px;">
+        <tbody>
+            <tr>
+                <td><label for="title">title:</label></td>
+                <td><input type="text" name="title" {% if form.title %}value="{{ form.title }}" {% endif %}></td>
+            </tr>
+            <tr>
+                <td><label for="link">url:</label></td>
+                <td><input type="text" name="link" {% if form.link %}value="{{ form.link }}" {% endif %}></td>
+            </tr>
+            <tr>
+                <td><label for="text">text:</label></td>
+                <td><textarea name="text" style="max-width: 500px; width: 100%;">{% if form.text %}{{ form.text }}{% endif %}</textarea></td>
+            </tr>
+            {% if error %}
+            <tr>
+                <td></td>
+                <td>
+                    <span style="color: red;">{{ error }}</span>
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td></td>
+                <td>
+                    <input type="submit" value="submit">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+{% else %}
+<p style="margin: 1em;">Your account is not verified yet!</p>
+{% endif %}
+{% endblock %}

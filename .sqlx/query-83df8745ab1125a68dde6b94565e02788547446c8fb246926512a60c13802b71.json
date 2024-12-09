@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT id, (\n                SELECT username FROM users WHERE (id = receiver_id OR id = sender_id) AND id <> $1\n            ) as partner_username, (\n                SELECT id FROM users WHERE (id = receiver_id OR id = sender_id) AND id <> $1\n            ) as partner_id FROM chats WHERE sender_id = $1 OR receiver_id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "partner_username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "partner_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "83df8745ab1125a68dde6b94565e02788547446c8fb246926512a60c13802b71"
+}

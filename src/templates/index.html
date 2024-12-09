@@ -1,0 +1,20 @@
+{% extends 'template.html' %}
+
+{% block content %}
+<style>
+    ol {
+        counter-reset: item {{ page * 20 }}; 
+    }
+</style>
+<ol>
+    {% for post in posts %}
+    <li>
+        {{ post_block(post, false, false) }}
+    </li>
+    {% endfor %}
+</ol>
+
+{% if posts|length == 20 %}
+<a style="color: #828282; margin: 2em;" href="?p={{ page + 1}}">more</a>
+{% endif %}
+{% endblock %}

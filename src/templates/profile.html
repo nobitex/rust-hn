@@ -1,0 +1,40 @@
+{% extends 'template.html' %}
+
+{% block content %}
+<form method="post">
+    <table id="form" style="width: 600px;">
+        <tbody>
+            <tr>
+                <td><label for="username">username:</label></td>
+                <td><span>{{ user.username }}</span></td>
+            </tr>
+            <tr>
+                <td><label for="created">created:</label></td>
+                <td><span>{{ user.created_at }}</span></td>
+            </tr>
+            <tr>
+                <td><label for="created">karma:</label></td>
+                <td><span>{{ user.karma }}</span></td>
+            </tr>
+            <tr>
+                <td><label for="about">about:</label></td>
+                <td><textarea name="about"></textarea></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><a href="#" class="lnk">change password</a></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><a href="#" class="lnk">submissions</a></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td style="text-align: center;padding: 2em;">
+                    <input type="submit" value="update">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+{% endblock %}
