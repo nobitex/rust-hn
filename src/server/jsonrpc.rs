@@ -103,7 +103,7 @@ pub async fn jsonrpc_server<D: ContextDB + 'static>(
     }
 
     let addr = server.local_addr()?;
-    log::info!("Running RPC server on: {}", addr);
+    log::info!("Running JsonRPC server on: {}", addr);
     let handle = server.start(module);
     handle.stopped().await;
 

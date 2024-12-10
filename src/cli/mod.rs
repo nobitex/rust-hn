@@ -6,7 +6,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     db::{PostgresDB, PostgresOpt, DB},
-    server::{jsonrpc_server, Context, JsonrpcOpt},
+    server::{jsonrpc_server, rest_server, Context, JsonrpcOpt, RestOpt},
 };
 
 #[derive(Debug, StructOpt)]
@@ -15,6 +15,8 @@ struct StartOpt {
     pub postgres_opt: PostgresOpt,
     #[structopt(flatten)]
     pub jsonrpc_opt: JsonrpcOpt,
+    #[structopt(flatten)]
+    pub rest_opt: RestOpt,
 }
 
 #[derive(Debug, StructOpt)]
@@ -37,8 +39,9 @@ pub async fn cli() -> Result<()> {
             // let users = pg_db.get_users().await?;
 
             let ctx = Arc::new(Mutex::new(Context { db: pg_db }));
-            let jsonrpc_server_fut = jsonrpc_server(ctx, opt.jsonrpc_opt);
-            tokio::try_join!(jsonrpc_server_fut)?;
+            let jsonrpc_server_fut = jsonrpc_server(ctx.clone(), opt.jsonrpc_opt);
+            let rest_server_fut = rest_server(ctx.clone(), opt.rest_opt);
+            tokio::try_join!(jsonrpc_server_fut, rest_server_fut)?;
         }
         Opt::Debug => {
             println!("Debug!");
