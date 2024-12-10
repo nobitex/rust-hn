@@ -2,11 +2,13 @@ use std::sync::Arc;
 
 use anyhow::{Ok, Result};
 use axum::routing::{get, post};
-use axum::{Extension, Router};
+use axum::{extract, Extension, Json, Router};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, SocketAddrV4};
 use structopt::StructOpt;
 use tokio::sync::Mutex;
 use tower_http::cors::CorsLayer;
+
+use crate::server::{sample_handler, SampleRequest};
 
 use super::{Context, ContextDB};
 
@@ -31,6 +33,15 @@ pub async fn rest_server<D: ContextDB + 'static>(
                     let users = ctx.db.get_users().await.unwrap();
 
                     format!("Users: {:?}", users)
+                }
+            }),
+        )
+        .route(
+            "/sample",
+            post({
+                let ctx = ctx.clone();
+                move |Json(req): Json<SampleRequest>| async move {
+                    super::handle_error(sample_handler(ctx.clone(), extract::Json(req)).await)
                 }
             }),
         )

@@ -8,8 +8,14 @@ pub use rpc_services::*;
 mod jsonrpc;
 pub use jsonrpc::*;
 
+mod rest_services;
+pub use rest_services::*;
+
 mod rest;
 pub use rest::*;
+
+mod utils;
+pub use utils::*;
 
 pub trait ContextDB: DB + Send + Sync {}
 

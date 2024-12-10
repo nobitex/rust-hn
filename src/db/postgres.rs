@@ -36,7 +36,7 @@ pub struct PostgresDB {
     pool: PgPool,
 }
 
-#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Clone, Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub(crate) struct User {
     pub id: i32,
     pub name: String,
