@@ -10,22 +10,22 @@ use super::DB;
 #[derive(Debug, Clone, StructOpt)]
 pub struct PostgresOpt {
     #[structopt(long, default_value = "localhost", env = "POSTGRES_HOST")]
-    pub host: String,
+    pub pg_host: String,
     #[structopt(long, default_value = "5432", env = "POSTGRES_PORT")]
-    pub port: u16,
+    pub pg_port: u16,
     #[structopt(long, default_value = "postgres", env = "POSTGRES_USER")]
     pub user: String,
     #[structopt(long, default_value = "password", env = "POSTGRES_PASSWORD")]
-    pub password: String,
+    pub pg_password: String,
     #[structopt(long, default_value = "satoshi", env = "POSTGRES_DB")]
-    pub db: String,
+    pub pg_db: String,
 }
 
 impl PostgresOpt {
     pub fn url(&self) -> String {
         format!(
             "postgres://{}:{}@{}:{}/{}",
-            self.user, self.password, self.host, self.port, self.db
+            self.user, self.pg_password, self.pg_host, self.pg_port, self.pg_db
         )
     }
 }
